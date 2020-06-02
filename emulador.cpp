@@ -469,7 +469,7 @@ word next_address(word next, byte jam){
 
 int main(){
   
-  /**load_microprog(); //carrega microprograma de controle
+  load_microprog(); //carrega microprograma de controle
 
   load_prog(); //carrega programa na memória principal a ser executado pelo emulador. Já que não temos entrada e saída, jogamos o programa direto na memória ao executar o emulador.
 
@@ -491,15 +491,10 @@ int main(){
     mainmemory_io(decmcode.mem);//implementar! Manipula memória principal
     mpc = next_address(decmcode.nadd, decmcode.jam);//implementar! Determina endereço da microinstruçãoo (mpc) a ser executada no próximo pulso de clock
 
-    //cout << endl << endl << "===========SAÍDA ULA===========" << endl << endl;
-    //write_dec(bus_c);
-    //cout << endl  << "===========SAÍDA ULA===========" << endl;
-
     getchar();
   }
 
-  debug(false);**/
-  alu(byte func, word a, word b);
+  debug(false);
 
 
   return 0;
