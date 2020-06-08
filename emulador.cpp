@@ -74,6 +74,12 @@ void load_prog(){
     
 }
 
+void load_microprogrom(){
+    FILE* microprograma = fopen("microprog.rom", "r");
+    fread(microprog, sizeof(unsigned long), 512, microprograma);
+    fclose(microprograma);
+}
+
 
 void write_microcode(microcode w){ //Dado uma microinstrucao, exibe na tela devidamente espaçado pelas suas partes.
 
@@ -473,6 +479,8 @@ int main(){
 
   load_prog(); //carrega programa na memória principal a ser executado pelo emulador. Já que não temos entrada e saída, jogamos o programa direto na memória ao executar o emulador.
 
+  //load_microprogrom(); //carrega microprog.rom 
+
   decoded_microcode decmcode;
 
   //laço principal de execução do emulador. Cada passo no laço corresponde a um pulso do clock.
@@ -491,11 +499,14 @@ int main(){
     mainmemory_io(decmcode.mem);//implementar! Manipula memória principal
     mpc = next_address(decmcode.nadd, decmcode.jam);//implementar! Determina endereço da microinstruçãoo (mpc) a ser executada no próximo pulso de clock
 
+    //cout << endl << endl << "===========SAÍDA ULA===========" << endl << endl;
+    //write_dec(bus_c);
+    //cout << endl  << "===========SAÍDA ULA===========" << endl;
+
     getchar();
   }
 
   debug(false);
-
 
   return 0;
   
