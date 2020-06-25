@@ -196,7 +196,16 @@ def codificacao(all_words, num_all_words): #Faz a codificação dos bytes
 def write_output(codigo): #Produz e coloca os bytes codificados no arquivo
    Q = []
    inic(registadores)
-   Q.append(len(codigo) + 20) 
+   tam = (len(codigo) + 20) 
+
+   Q.append(tam%256)
+   tam = tam//256
+   Q.append(tam%256)
+   tam = tam//256
+   Q.append(tam%256)
+   tam = tam//256
+   Q.append(tam%256)
+
    codigo = Q + inicial + codigo
    final_bytes = bytes(codigo)
    filename = sys.argv[1].split('.')[0] + '.exe'
@@ -213,10 +222,8 @@ def main():
       identificadores(arquivo)
       contador(arquivo)
       words(arquivo)
-      print(num_all_words)
       cont_vars(all_words)
       corrige(all_words, num_all_words)
-      print(num_all_words)
       codificacao(all_words, num_all_words)
       write_output(codigo)
    else:
