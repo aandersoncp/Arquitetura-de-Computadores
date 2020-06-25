@@ -1,14 +1,14 @@
 import sys
 
 comandos = {'nop': 0x01, 'iadd': 0x02, 'isub': 0x05, 'iand': 0x08, 'ior': 0x0B, 'dup': 0x0E, 'pop': 0x10, 'swap': 0x13, 'bipush': 0x19, 'iload': 0x1C, 'istore': 0x22, 'wide': 0x28, 'ldc_w': 0x32, 'iinc': 0x36, 'goto': 0x3C, 'iflt': 0x43, 'ifeq': 0x47, 'if_icmpeq': 0x4B, 'invokevirtual': 0x55, 'ireturn': 0x6B}
-arquivo = []
-all_words = []
-num_all_words = []
-codigo = []
-ident_ind = []
-ident = {}
-variaveis = {}
-varia_ind = {}
+arquivo = [] #lista com elementos sendo as linhas do programa
+all_words = [] #lista com elementos sendo todas as strings do programa
+num_all_words = [] #lista/vetor que tem o número correspondente do byte de cada elemento da lista all_words
+codigo = [] #lista/vetor com os decimais correpondentes a tradução do programa, junto com inicialização e tamanho do programa
+ident_ind = [] #lista com os índices (o byte que representa) dos identificadores de linha
+ident = {} #dicionário com os identificadores e seus respectivos índices (o byte que representa)
+variaveis = {} #dicionário com as variáveis e tendo seus valores sendo as próprias variáveis
+varia_ind = {} #dicionário com as variáveis e tendo seus valores o índice da ordem que elas aparecem
 
 inicial = []
 registadores = [29440, 6, 4097, 1024]
@@ -49,7 +49,7 @@ def verificador(arquivo): #Verifica se a sintaxe do arquivo está correta
             ok = False
    return ok
 
-def identificadores(arquivo):  #Identifica o byte que o identificador aponta
+def identificadores(arquivo):  #Identifica o byte que o identificador representam
    i = 0
    for linhas in arquivo:
    	if len(linhas) == 1:
@@ -82,7 +82,7 @@ def contador(arquivo): #Constroi uma lista ajudando onde há variáveis, conta o
             ident[linhas[0]] = j
             num_all_words.append(0)   
             num_all_words.append(j)
-            j = j + 1 #########################################################
+            j = j + 1 
          else:
             if linhas[0] in ['ldc_w', 'goto', 'iflt', 'ifeq', 'if_icmpeq', 'invokevirtual']:
                num_all_words.append(j)
@@ -143,12 +143,12 @@ def contador(arquivo): #Constroi uma lista ajudando onde há variáveis, conta o
          
 
 
-def words(arquivo): #Função que produz uma lista com todas as palavras do arquivo de entrada
+def words(arquivo): #Função que produz uma lista com todas as strings(identificadores de linha, comando, operandos e variáveis) do arquivo de entrada, diferente de arquivo que tem como cada elemento as linhas do programa
    for linhas in arquivo:
    	for palavras in linhas:
          all_words.append(palavras)
 
-def cont_vars(all_words): 
+def cont_vars(all_words): #Coloca no dicionário variaveis as variaveis com o valor sendo elas mesmas {'x': 'x', 'y': 'y'}, em outro dicionario coloca a variável, porém com o valor da ordem que ela aparece {'x': 0, 'y': 1}, isso nos ajuda na hora de traduzir
    i = 0
    for palavras in all_words:
    	if palavras not in comandos and palavras not in ident:
@@ -157,7 +157,7 @@ def cont_vars(all_words):
          	varia_ind[palavras] = i 
          	i = i + 1
 
-def corrige(all_words, num_all_words): 
+def corrige(all_words, num_all_words): #Função que coloca a string que identifica a variáveil na posição(byte) que ela aparece na lista/vetor num_all_words, lista/vetor nos ajuda na hora de "traduzir"
    i = 0;
    for palavras in all_words:
    	if palavras in variaveis:
@@ -193,7 +193,7 @@ def codificacao(all_words, num_all_words): #Faz a codificação dos bytes
                aux = int(all_words[i])
                codigo.append(int(all_words[i]))
 
-def write_output(codigo): #Produz e coloca os bytes codificados no arquivo
+def saida(codigo): #Produz e coloca os bytes codificados no arquivo
    Q = []
    inic(registadores)
    tam = (len(codigo) + 20) 
@@ -225,7 +225,7 @@ def main():
       cont_vars(all_words)
       corrige(all_words, num_all_words)
       codificacao(all_words, num_all_words)
-      write_output(codigo)
+      saida(codigo)
    else:
       print("False \n")
 
