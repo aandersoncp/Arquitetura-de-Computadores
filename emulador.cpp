@@ -42,9 +42,6 @@ bool fun_lm = false;
 //registradores de microprograma
 word mpc = 0;
 
-//variável que guarda o número de de bytes de um programa carregado na função load_memory_() 
-int tamanho = 0;
-
 //memória de microprograma: 512 x 64 bits = 512 x 8 bytes = 4096 bytes = 4 KBytes.
 //Cada microinstrução é armazenada em 8 bytes (64 bits), mas apenas os 4,5 bytes (36 bits) de ordem mais baixa são de fato decodificados.
 //Os 28 bits restantes em cada posição da memória são ignorados, mas podem ser utilizados para futuras melhorias nas microinstruções para controlar microarquiteturas mais complexas.
@@ -163,16 +160,15 @@ void load_microprogrom()//função que abre arquivo microprog.rom
     fclose(microprograma);
 }
 
-void load_memory_() //função que abre um arquivo binário gerado pelo montador e carregue o programa na memória principal para ser executado
+void load_memory() //função que abre um arquivo binário gerado pelo montador e carregue o programa na memória principal para ser executado
 { 
-  byte tam[4];
-    FILE* memoria = fopen("prog2.exe", "r");
-    for(int i = 0; i < 4; i++){
-      fread(tam, sizeof(byte), 1,  memoria);
-      tamanho = tamanho + tam[i]*pow(2, i);
-    }
-    fread(memory, sizeof(byte), tamanho,  memoria);
-    fclose(memoria);
+  int tamanho[1];
+  FILE* prog = fopen("prog2.exe", "r");
+  fread(tamanho, 4, 1, prog);
+  int n = tamanho[0];
+  printf("tamanho: %d\n", tamanho[0]);
+  fread(memory, sizeof(byte), n, prog);
+  fclose(prog);
 }
 
 
@@ -306,7 +302,8 @@ void shift(byte s, word w)
   bus_c = w;
 }
 
-void write_register(word reg_end){
+void write_register(word reg_end)
+{
 	unsigned int v[9];
    for(int i = 8; i >= 0; i--){
       v[i] = (reg_end & 1);
@@ -588,11 +585,13 @@ word next_address(word next, byte jam)
 
 int main(){
   
-  load_microprog(); //carrega microprograma de controle
+  //load_microprog(); //carrega microprograma de controle
 
-  //load_prog(); //carrega programa na memória principal a ser executado pelo emulador. Já que não temos entrada e saída, jogamos o programa direto na memória ao executar o emulador.
+  load_microprogrom(); //carrega o arquivo microprog.rom 
 
-  load_microprogrom(); //carrega microprog.rom 
+  load_prog(); //carrega programa na memória principal a ser executado pelo emulador. Já que não temos entrada e saída, jogamos o programa direto na memória ao executar o emulador.
+
+  load_memory(); //carrega o programa a partir do arquivo binário produzido pelo montador
 
   decoded_microcode decmcode;
 
