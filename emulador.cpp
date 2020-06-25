@@ -36,8 +36,14 @@ byte n = 0, z = 1;
 //sinalizador para desligar máquina
 bool halt = false;
 
+//sinalizador do uso da função load_microprogrom()
+bool fun_lm = false;
+
 //registradores de microprograma
 word mpc = 0;
+
+//variável que guarda o número de de bytes de um programa carregado na função load_memory_() 
+int tamanho = 0;
 
 //memória de microprograma: 512 x 64 bits = 512 x 8 bytes = 4096 bytes = 4 KBytes.
 //Cada microinstrução é armazenada em 8 bytes (64 bits), mas apenas os 4,5 bytes (36 bits) de ordem mais baixa são de fato decodificados.
@@ -47,23 +53,52 @@ microcode microprog[512];
 //carrega microprograma
 //Escreve um microprograma de controle na memória de controle (array microprog, declarado logo acima)
 void load_microprog(){
+  fun_lm = false;
   //Exemplo da aula 09
-  microprog[0] = 70582801;
+  /**microprog[0] = 70582801;
   microprog[1] = 271909393;
   microprog[2] = 403996674;
   microprog[3] = 540344849;
   microprog[4] = 672415746;
-  microprog[5] = 3932418;
+  microprog[5] = 3932418;**/
+
+ /** microprog[0] = 0b000000000100001101010000001000010001;
+  microprog[1] = 0b0;
+  microprog[2] = 0b000000011000001101010000001000010001;
+  microprog[3] = 0b000000100000000101000000000010100010;
+  microprog[4] = 0b000000101000000101001000000000000000;
+  microprog[5] = 0b000000000000001111000100000000001000;
+  microprog[6] = 0b000000111000001101010000001000010001;
+  microprog[7] = 0b000001000000000101000000000010000010;
+  microprog[8] = 0b000000000000000101000000000101001000;
+  microprog[9] = 0b000001010000001101010000001000010001;
+  microprog[10] = 0b000000000100000101000000001000010010;
+  microprog[11] = 0b000001100001000101000100000000001000;
+  microprog[12] = 0b000000000000001101010000001000000001;
+  microprog[268] = 0b100001101000001101010000001000010001;
+  microprog[269] = 0b000000000100000101000000001000010010;
+  microprog[13] = 0b000001110000001101010000001000010001;
+  microprog[14] = 0b000001111000000101000000000010100010;
+  microprog[15] = 0b000010000000000101001000000000000000;
+  microprog[16] = 0b000000000000001111110100000000001000; **/
+
+ 
+ 
 }
 
 //carrega programa na memória principal para ser executado pelo emulador.
 //programa escrito em linguagem de máquina (binário) direto na memória principal (array memory declarado mais acima).
 void load_prog(){
   //Programa que soma 2 e 3
-  memory[0] = 0; // 0
-  memory[1] = 1; // 1
-  memory[2] = 2; // 2
-  memory[3] = 3; // 3
+  /**memory[0] = 0; // 0
+  memory[1] = 2; // 1
+  memory[2] = 10; // 2
+  memory[3] = 2; // 3
+  memory[4] = 11;
+  memory[5] = 6;
+  memory[6] = 12;
+  memory[40] = 5;
+  memory[44] = 3;**/
   //memory[4] = 0b00001110; // 14
   //memory[5] = 0b00000001; // 1
   //memory[6] = 0b00000010; // 2
@@ -71,18 +106,78 @@ void load_prog(){
   //memory[8] = 0b00000111; // 
   //memory[9] = 0b00001011; //
   //memory[10] = 0b00001111; //1;
+
+
+  memory[0] = 0x00;
+  memory[1] = 0x73;
+  memory[2] = 0x00;
+  memory[3] = 0x00;
+  memory[4] = 0x06;
+  memory[5] = 0x00;
+  memory[6] = 0x00;
+  memory[7] = 0x00;
+  memory[8] = 0x01;
+  memory[9] = 0x10;
+  memory[10] = 0x00;
+  memory[11] = 0x00;
+  memory[12] = 0x00;
+  memory[13] = 0x04;
+  memory[14] = 0x00;
+  memory[15] = 0x00;
+  memory[16] = 0x03;
+  memory[17] = 0x10;
+  memory[18] = 0x00;
+  memory[19] = 0x00;
+  memory[20] = 0x19;
+  memory[21] = 0x15;
+  memory[22] = 0x22;
+  memory[23] = 0x00;
+  memory[24] = 0x19;
+  memory[25] = 0x0c;
+  memory[26] = 0x19;
+  memory[27] = 0x03;
+  memory[28] = 0x02;
+  memory[29] = 0x22;
+  memory[30] = 0x01;
+  memory[31] = 0x1c;
+  memory[32] = 0x01;
+  memory[33] = 0x1c;
+  memory[34] = 0x00;
+  memory[35] = 0x4b;
+  memory[36] = 0x00;
+  memory[37] = 0x08;
+  memory[38] = 0x1c;
+  memory[39] = 0x01;
+  memory[40] = 0x3c;
+  memory[41] = 0xff;
+  memory[42] = 0xf2;
+  memory[43] = 0x01;
     
 }
 
-void load_microprogrom(){
+void load_microprogrom()//função que abre arquivo microprog.rom
+{ 
+    fun_lm = true;
     FILE* microprograma = fopen("microprog.rom", "r");
     fread(microprog, sizeof(unsigned long), 512, microprograma);
     fclose(microprograma);
 }
 
+void load_memory_() //função que abre um arquivo binário gerado pelo montador e carregue o programa na memória principal para ser executado
+{ 
+  byte tam[4];
+    FILE* memoria = fopen("prog2.exe", "r");
+    for(int i = 0; i < 4; i++){
+      fread(tam, sizeof(byte), 1,  memoria);
+      tamanho = tamanho + tam[i]*pow(2, i);
+    }
+    fread(memory, sizeof(byte), tamanho,  memoria);
+    fclose(memoria);
+}
 
-void write_microcode(microcode w){ //Dado uma microinstrucao, exibe na tela devidamente espaçado pelas suas partes.
 
+void write_microcode(microcode w) //Dado uma microinstrucao, exibe na tela devidamente espaçado pelas suas partes.
+{
    unsigned int v[36];
    for(int i = 35; i >= 0; i--)
    {
@@ -127,7 +222,8 @@ void write_dec(word d) //Dada uma palavra (valor de 32 bits / 4 bytes), exibe o 
 }
 
 
-decoded_microcode decode_microcode(microcode code){ //Recebe uma microinstrução binaria e separa suas partes preenchendo uma estrutura de microinstrucao decodificada, retornando-a.
+decoded_microcode decode_microcode(microcode code) //Recebe uma microinstrução binaria e separa suas partes preenchendo uma estrutura de microinstrucao decodificada, retornando-a.
+{ 
     decoded_microcode dec;
     unsigned int v = 0;
     int i;
@@ -182,25 +278,39 @@ decoded_microcode decode_microcode(microcode code){ //Recebe uma microinstruçã
     return dec;
 }
 
-void shift(byte s, word w){
+void shift(byte s, word w)
+{
 	int left, right;
-	right = (s & 1);
-	s = s >> 1;
-	left = (s & 1);
+  if(fun_lm){
+    left = (s & 1);
+    s = s >> 1;
+    right = (s & 1);
 
-	if(left == 1 && right == 0){
-		w = w << 8;
-	} else if(left == 0 && right == 1){
-		w = w >> 1;
-	}
-	bus_c = w;
+    if(left == 1 && right == 0){
+      w = w << 8;
+    } else if(left == 0 && right == 1){
+      w = w >> 1;
+    }
+  } else{
+    right = (s & 1);
+    s = s >> 1;
+    left = (s & 1);
+
+    if(left == 1 && right == 0){
+      w = w << 8;
+    } else if(left == 0 && right == 1){
+      w = w >> 1;
+    }
+  }
+
+  bus_c = w;
 }
 
 void write_register(word reg_end){
 	unsigned int v[9];
    for(int i = 8; i >= 0; i--){
-       v[i] = (reg_end & 1);
-       reg_end = reg_end >> 1;
+      v[i] = (reg_end & 1);
+      reg_end = reg_end >> 1;
    } 
    if(v[0] == 1){
    	h = bus_c;
@@ -230,7 +340,8 @@ void write_register(word reg_end){
 		mar = bus_c;
    }
 }
-void read_registers(byte reg_end){
+void read_registers(byte reg_end)
+{
    if(reg_end == 0){
    	bus_b = mdr;
    }
@@ -273,7 +384,8 @@ void read_registers(byte reg_end){
 
    bus_a = h;
 }
-void mainmemory_io(byte control){
+void mainmemory_io(byte control)
+{
     int k;
     k = (control & 1);
     control = control >> 1;
@@ -369,7 +481,8 @@ void debug(bool clr = true)
     cout << ")" << endl;
 }
 
-void alu(byte func, word a, word b){
+void alu(byte func, word a, word b)
+{
     int k = 0;
     for(int i = 0; i < 6; i++){
       k = (func & 1)*pow(2, i) + k;
@@ -441,8 +554,8 @@ void alu(byte func, word a, word b){
     cout << "alu_out: " << alu_out << endl;
 }
 
-word next_address(word next, byte jam){
-
+word next_address(word next, byte jam)
+{
   int jamz, jamn, jmpc, aux = 0;
   word aux2 = next;
 
@@ -477,9 +590,9 @@ int main(){
   
   load_microprog(); //carrega microprograma de controle
 
-  load_prog(); //carrega programa na memória principal a ser executado pelo emulador. Já que não temos entrada e saída, jogamos o programa direto na memória ao executar o emulador.
+  //load_prog(); //carrega programa na memória principal a ser executado pelo emulador. Já que não temos entrada e saída, jogamos o programa direto na memória ao executar o emulador.
 
-  //load_microprogrom(); //carrega microprog.rom 
+  load_microprogrom(); //carrega microprog.rom 
 
   decoded_microcode decmcode;
 
@@ -498,10 +611,6 @@ int main(){
     write_register(decmcode.reg_w);//implementar! Escreve registradores
     mainmemory_io(decmcode.mem);//implementar! Manipula memória principal
     mpc = next_address(decmcode.nadd, decmcode.jam);//implementar! Determina endereço da microinstruçãoo (mpc) a ser executada no próximo pulso de clock
-
-    //cout << endl << endl << "===========SAÍDA ULA===========" << endl << endl;
-    //write_dec(bus_c);
-    //cout << endl  << "===========SAÍDA ULA===========" << endl;
 
     getchar();
   }
